@@ -1448,7 +1448,10 @@ ucl_object_insert_key_common (ucl_object_t *top, ucl_object_t *elt,
 	}
 	else {
 		if (merge) {
-			if (found->type != UCL_OBJECT && elt->type == UCL_OBJECT) {
+			if (found->type == UCL_ARRAY && elt->type == UCL_OBJECT) {
+				ret = ucl_array_append(found, elt);
+			}
+			else if (found->type != UCL_OBJECT && elt->type == UCL_OBJECT) {
 				/* Insert old elt to new one */
 				ucl_object_insert_key_common (elt, found, found->key,
 						found->keylen, copy_key, merge, replace);
@@ -1468,6 +1471,9 @@ ucl_object_insert_key_common (ucl_object_t *top, ucl_object_t *elt,
 							cur->keylen, copy_key, merge, replace);
 				}
 				ucl_object_unref (elt);
+			}
+			else if (found->type == UCL_ARRAY && elt->type == UCL_ARRAY) {
+				ret = ucl_array_merge (found, elt);
 			}
 			else if (replace) {
 				/* merge-and-replace mode */
@@ -1821,6 +1827,23 @@ ucl_object_frombool (bool bv)
 	}
 
 	return obj;
+}
+
+bool
+ucl_array_merge (ucl_object_t *top, ucl_object_t *elt)
+{
+	ucl_object_t *cur, *tmp;
+	ucl_object_iter_t it = NULL;
+	bool success = false;
+
+	while ((cur = ucl_iterate_object (elt, &it, true)) != NULL) {
+		tmp = ucl_object_ref (cur);
+		success = ucl_array_append (top, tmp);
+		if (success == false) {
+			break;
+		}
+	}
+	return success;
 }
 
 bool

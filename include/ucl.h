@@ -417,6 +417,15 @@ UCL_EXTERN bool ucl_object_insert_key_merged (ucl_object_t *top, ucl_object_t *e
 		const char *key, size_t keylen, bool copy_key);
 
 /**
+ * Merge the contents of two array objects
+ * @param top destination object (will be created automatically if top is NULL)
+ * @param elt element to append (must NOT be NULL)
+ * @return true if value has been inserted
+ */
+UCL_EXTERN bool ucl_array_merge (ucl_object_t *top,
+		ucl_object_t *elt);
+
+/**
  * Append an element to the front of array object
  * @param top destination object (will be created automatically if top is NULL)
  * @param elt element to append (must NOT be NULL)
