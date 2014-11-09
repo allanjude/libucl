@@ -1897,6 +1897,33 @@ ucl_array_prepend (ucl_object_t *top, ucl_object_t *elt)
 	return true;
 }
 
+bool
+ucl_array_merge (ucl_object_t *top, ucl_object_t *elt, bool copy)
+{
+	ucl_object_t *cur, *tmp, *cp;
+
+	if (elt == NULL || top == NULL || top->type != UCL_ARRAY || elt->type != UCL_ARRAY) {
+		return false;
+	}
+
+	DL_FOREACH_SAFE (elt->value.av, cur, tmp) {
+		if (copy) {
+			cp = ucl_object_copy (cur);
+		} else {
+			cp = cur;
+		}
+		if (cp != NULL) {
+			ucl_array_append (top, cp);
+		}
+	}
+	if (!copy) {
+		elt->value.av = NULL;
+		elt->len = 0;
+	}
+
+	return true;
+}
+
 ucl_object_t *
 ucl_array_delete (ucl_object_t *top, ucl_object_t *elt)
 {
@@ -1974,6 +2001,28 @@ ucl_array_find_index (const ucl_object_t *top, unsigned int index)
 	while ((ret = ucl_iterate_object (top, &it, true)) != NULL) {
 		if (index == 0) {
 			return ret;
+		}
+		--index;
+	}
+
+	return NULL;
+}
+
+ucl_object_t *
+ucl_array_replace_index (ucl_object_t *top, ucl_object_t *elt,
+	unsigned int index)
+{
+	ucl_object_t *cur, *tmp;
+
+	if (top == NULL || top->type != UCL_ARRAY || elt == NULL ||
+			top->len == 0 || (index + 1) > top->len) {
+		return NULL;
+	}
+
+	DL_FOREACH_SAFE (top->value.av, cur, tmp) {
+		if (index == 0) {
+			DL_REPLACE_ELEM (top->value.av, cur, elt);
+			return cur;
 		}
 		--index;
 	}

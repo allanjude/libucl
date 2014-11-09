@@ -327,7 +327,7 @@ UCL_EXTERN ucl_object_t* ucl_object_frombool (bool bv) UCL_WARN_UNUSED_RESULT;
 
 /**
  * Insert a object 'elt' to the hash 'top' and associate it with key 'key'
- * @param top destination object (will be created automatically if top is NULL)
+ * @param top destination object (must be of type UCL_OBJECT)
  * @param elt element to insert (must NOT be NULL)
  * @param key key to associate with this object (either const or preallocated)
  * @param keylen length of the key (or 0 for NULL terminated keys)
@@ -340,7 +340,7 @@ UCL_EXTERN bool ucl_object_insert_key (ucl_object_t *top, ucl_object_t *elt,
 /**
  * Replace a object 'elt' to the hash 'top' and associate it with key 'key', old object will be unrefed,
  * if no object has been found this function works like ucl_object_insert_key()
- * @param top destination object (will be created automatically if top is NULL)
+ * @param top destination object (must be of type UCL_OBJECT)
  * @param elt element to insert (must NOT be NULL)
  * @param key key to associate with this object (either const or preallocated)
  * @param keylen length of the key (or 0 for NULL terminated keys)
@@ -406,7 +406,7 @@ UCL_EXTERN ucl_object_t* ucl_object_pop_key (ucl_object_t *top, const char *key)
 /**
  * Insert a object 'elt' to the hash 'top' and associate it with key 'key', if the specified key exist,
  * try to merge its content
- * @param top destination object (will be created automatically if top is NULL)
+ * @param top destination object (must be of type UCL_OBJECT)
  * @param elt element to insert (must NOT be NULL)
  * @param key key to associate with this object (either const or preallocated)
  * @param keylen length of the key (or 0 for NULL terminated keys)
@@ -427,7 +427,7 @@ UCL_EXTERN bool ucl_array_merge (ucl_object_t *top,
 
 /**
  * Append an element to the front of array object
- * @param top destination object (will be created automatically if top is NULL)
+ * @param top destination object (must NOT be NULL)
  * @param elt element to append (must NOT be NULL)
  * @return true if value has been inserted
  */
@@ -436,12 +436,22 @@ UCL_EXTERN bool ucl_array_append (ucl_object_t *top,
 
 /**
  * Append an element to the start of array object
- * @param top destination object (will be created automatically if top is NULL)
+ * @param top destination object (must NOT be NULL)
  * @param elt element to append (must NOT be NULL)
  * @return true if value has been inserted
  */
 UCL_EXTERN bool ucl_array_prepend (ucl_object_t *top,
 		ucl_object_t *elt);
+
+/**
+ * Move all elements of second array into the first array
+ * @param top destination array (must be of type UCL_ARRAY)
+ * @param elt array to copy elements from (must be of type UCL_ARRAY)
+ * @param copy copy elements instead of moving them
+ * @return true if second array was not null
+ */
+UCL_EXTERN bool ucl_array_merge (ucl_object_t *top, ucl_object_t *elt,
+		bool copy);
 
 /**
  * Removes an element `elt` from the array `top`. Caller must unref the returned object when it is not
@@ -477,12 +487,23 @@ UCL_EXTERN ucl_object_t* ucl_array_pop_last (ucl_object_t *top);
 
 /**
  * Return object identified by an index of the array `top`
- * @param obj object to get a key from (must be of type UCL_ARRAY)
- * @param index index to return
+ * @param top object to get a key from (must be of type UCL_ARRAY)
+ * @param index array index to return
  * @return object at the specified index or NULL if index is not found
  */
 UCL_EXTERN const ucl_object_t* ucl_array_find_index (const ucl_object_t *top,
 		unsigned int index);
+
+/**
+ * Replace an element in an array with a different element
+ * @param top destination object (must be of type UCL_ARRAY)
+ * @param elt element to append (must NOT be NULL)
+ * @param index array index in destination to overwrite with elt
+ * @return object that was replaced or NULL if index is not found
+ */
+ucl_object_t *
+ucl_array_replace_index (ucl_object_t *top, ucl_object_t *elt,
+	unsigned int index);
 
 /**
  * Removes the first element from the array `top`. Caller must unref the returned object when it is not
