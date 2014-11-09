@@ -351,20 +351,6 @@ UCL_EXTERN bool ucl_object_replace_key (ucl_object_t *top, ucl_object_t *elt,
 		const char *key, size_t keylen, bool copy_key);
 
 /**
- * Merge-and-Replace a object 'elt' to the hash 'top' and associate it with key
- * 'key', old object will be unrefed,
- * if no object has been found this function works like ucl_object_insert_key()
- * @param top destination object (will be created automatically if top is NULL)
- * @param elt element to insert (must NOT be NULL)
- * @param key key to associate with this object (either const or preallocated)
- * @param keylen length of the key (or 0 for NULL terminated keys)
- * @param copy_key make an internal copy of key
- * @return true if key has been inserted
- */
-UCL_EXTERN bool ucl_object_mix_key (ucl_object_t *top, ucl_object_t *elt,
-		const char *key, size_t keylen, bool copy_key);
-
-/**
  * Delete a object associated with key 'key', old object will be unrefered,
  * @param top object
  * @param key key associated to the object to remove
@@ -415,15 +401,6 @@ UCL_EXTERN ucl_object_t* ucl_object_pop_key (ucl_object_t *top, const char *key)
  */
 UCL_EXTERN bool ucl_object_insert_key_merged (ucl_object_t *top, ucl_object_t *elt,
 		const char *key, size_t keylen, bool copy_key);
-
-/**
- * Merge the contents of two array objects
- * @param top destination object (will be created automatically if top is NULL)
- * @param elt element to append (must NOT be NULL)
- * @return true if value has been inserted
- */
-UCL_EXTERN bool ucl_array_merge (ucl_object_t *top,
-		ucl_object_t *elt);
 
 /**
  * Append an element to the front of array object

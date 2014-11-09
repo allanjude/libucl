@@ -1382,7 +1382,7 @@ ucl_object_insert_key_common (ucl_object_t *top, ucl_object_t *elt,
 		return false;
 	}
 
-	if (top->type != UCL_OBJECT && top->type != UCL_ARRAY) {
+	if (top->type != UCL_OBJECT) {
 		/* It is possible to convert NULL type to an object */
 		if (top->type == UCL_NULL) {
 			top->type = UCL_OBJECT;
@@ -1424,75 +1424,46 @@ ucl_object_insert_key_common (ucl_object_t *top, ucl_object_t *elt,
 		ucl_copy_key_trash (elt);
 	}
 
-	if (top->type == UCL_ARRAY) {
-		found = __DECONST (ucl_object_t *, ucl_array_find_index
-			(top, strtoul(key, NULL, 10)));
-	} else {
-		found = __DECONST (ucl_object_t *,
-			ucl_hash_search_obj (top->value.ov, elt));
-	}
+	found = __DECONST (ucl_object_t *, ucl_hash_search_obj (top->value.ov, elt));
 
 	if (found == NULL) {
-		if (top->type == UCL_ARRAY && replace) {
-			return false;
-		}
 		top->value.ov = ucl_hash_insert_object (top->value.ov, elt);
 		top->len ++;
 		if (replace) {
-			/** If the key did not exist, and we insert it, why
-			 * return false here? check that this is covered by the
-			 * tests
-			 */
 			ret = false;
 		}
 	}
 	else {
-		if (merge) {
-			if (found->type == UCL_ARRAY && elt->type == UCL_OBJECT) {
-				ret = ucl_array_append(found, elt);
-			}
-			else if (found->type != UCL_OBJECT && elt->type == UCL_OBJECT) {
+		if (replace) {
+			ucl_hash_replace (top->value.ov, found, elt);
+			ucl_object_unref (found);
+		}
+		else if (merge) {
+			if (found->type != UCL_OBJECT && elt->type == UCL_OBJECT) {
 				/* Insert old elt to new one */
 				ucl_object_insert_key_common (elt, found, found->key,
-						found->keylen, copy_key, merge, replace);
+						found->keylen, copy_key, false, false);
 				ucl_hash_delete (top->value.ov, found);
 				top->value.ov = ucl_hash_insert_object (top->value.ov, elt);
 			}
 			else if (found->type == UCL_OBJECT && elt->type != UCL_OBJECT) {
 				/* Insert new to old */
 				ucl_object_insert_key_common (found, elt, elt->key,
-						elt->keylen, copy_key, merge, replace);
+						elt->keylen, copy_key, false, false);
 			}
 			else if (found->type == UCL_OBJECT && elt->type == UCL_OBJECT) {
 				/* Mix two hashes */
 				while ((cur = ucl_iterate_object (elt, &it, true)) != NULL) {
 					tmp = ucl_object_ref (cur);
 					ucl_object_insert_key_common (found, tmp, cur->key,
-							cur->keylen, copy_key, merge, replace);
+							cur->keylen, copy_key, false, false);
 				}
 				ucl_object_unref (elt);
-			}
-			else if (found->type == UCL_ARRAY && elt->type == UCL_ARRAY) {
-				ret = ucl_array_merge (found, elt);
-			}
-			else if (replace) {
-				/* merge-and-replace mode */
-				ucl_hash_replace (top->value.ov, found, elt);
-				ucl_object_unref (found);
 			}
 			else {
 				/* Just make a list of scalars */
 				DL_APPEND (found, elt);
 			}
-		}
-		else if (replace && top->type == UCL_ARRAY) {
-			found->len = elt->len;
-			found->value.av = elt->value.av;
-			ucl_object_unref (elt);
-		}
-		else if (replace) {
-			ucl_hash_replace (top->value.ov, found, elt);
-			ucl_object_unref (found);
 		}
 		else {
 			DL_APPEND (found, elt);
@@ -1576,30 +1547,19 @@ ucl_object_replace_key (ucl_object_t *top, ucl_object_t *elt,
 	return ucl_object_insert_key_common (top, elt, key, keylen, copy_key, false, true);
 }
 
-bool
-ucl_object_mix_key (ucl_object_t *top, ucl_object_t *elt,
-		const char *key, size_t keylen, bool copy_key)
-{
-	return ucl_object_insert_key_common (top, elt, key, keylen, copy_key, true, true);
-}
-
 const ucl_object_t *
 ucl_object_find_keyl (const ucl_object_t *obj, const char *key, size_t klen)
 {
 	const ucl_object_t *ret;
 	ucl_object_t srch;
 
-	if (obj == NULL || key == NULL) {
-		return NULL;
-	} else if (obj->type == UCL_ARRAY) {
-		ret = ucl_array_find_index (obj, strtoul(key, NULL, 10));
-	} else if (obj->type == UCL_OBJECT) {
-		srch.key = key;
-		srch.keylen = klen;
-		ret = ucl_hash_search_obj (obj->value.ov, &srch);
-	} else {
+	if (obj == NULL || obj->type != UCL_OBJECT || key == NULL) {
 		return NULL;
 	}
+
+	srch.key = key;
+	srch.keylen = klen;
+	ret = ucl_hash_search_obj (obj->value.ov, &srch);
 
 	return ret;
 }
@@ -1827,23 +1787,6 @@ ucl_object_frombool (bool bv)
 	}
 
 	return obj;
-}
-
-bool
-ucl_array_merge (ucl_object_t *top, ucl_object_t *elt)
-{
-	ucl_object_t *cur, *tmp;
-	ucl_object_iter_t it = NULL;
-	bool success = false;
-
-	while ((cur = ucl_iterate_object (elt, &it, true)) != NULL) {
-		tmp = ucl_object_ref (cur);
-		success = ucl_array_append (top, tmp);
-		if (success == false) {
-			break;
-		}
-	}
-	return success;
 }
 
 bool
