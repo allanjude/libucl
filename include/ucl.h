@@ -378,8 +378,9 @@ UCL_EXTERN bool ucl_object_delete_key (ucl_object_t *top,
 
 
 /**
- * Delete key from `top` object returning the object deleted. This object is not
- * released
+ * Removes `key` from `top` object, returning the object that was removed. This
+ * object is not released, caller must unref the returned object when it is no
+ * longer needed.
  * @param top object
  * @param key key to remove
  * @param keylen length of the key (or 0 for NULL terminated keys)
@@ -389,8 +390,9 @@ UCL_EXTERN ucl_object_t* ucl_object_pop_keyl (ucl_object_t *top, const char *key
 		size_t keylen) UCL_WARN_UNUSED_RESULT;
 
 /**
- * Delete key from `top` object returning the object deleted. This object is not
- * released
+ * Removes `key` from `top` object returning the object that was removed. This
+ * object is not released, caller must unref the returned object when it is no
+ * longer needed.
  * @param top object
  * @param key key to remove
  * @return removed object or NULL if object has not been found
@@ -399,8 +401,8 @@ UCL_EXTERN ucl_object_t* ucl_object_pop_key (ucl_object_t *top, const char *key)
 	UCL_WARN_UNUSED_RESULT;
 
 /**
- * Insert a object 'elt' to the hash 'top' and associate it with key 'key', if the specified key exist,
- * try to merge its content
+ * Insert a object 'elt' to the hash 'top' and associate it with key 'key', if
+ * the specified key exist, try to merge its content
  * @param top destination object (must be of type UCL_OBJECT)
  * @param elt element to insert (must NOT be NULL)
  * @param key key to associate with this object (either const or preallocated)
@@ -412,7 +414,7 @@ UCL_EXTERN bool ucl_object_insert_key_merged (ucl_object_t *top, ucl_object_t *e
 		const char *key, size_t keylen, bool copy_key);
 
 /**
- * Append an element to the front of array object
+ * Append an element to the end of array object
  * @param top destination object (must NOT be NULL)
  * @param elt element to append (must NOT be NULL)
  * @return true if value has been inserted
@@ -440,8 +442,9 @@ UCL_EXTERN bool ucl_array_merge (ucl_object_t *top, ucl_object_t *elt,
 		bool copy);
 
 /**
- * Removes an element `elt` from the array `top`. Caller must unref the returned object when it is not
- * needed.
+ * Removes an element `elt` from the array `top`, returning the object that was
+ * removed. This object is not released, caller must unref the returned object
+ * when it is no longer needed.
  * @param top array ucl object
  * @param elt element to remove
  * @return removed element or NULL if `top` is NULL or not an array
@@ -464,15 +467,25 @@ UCL_EXTERN const ucl_object_t* ucl_array_head (const ucl_object_t *top);
 UCL_EXTERN const ucl_object_t* ucl_array_tail (const ucl_object_t *top);
 
 /**
- * Removes the last element from the array `top`. Caller must unref the returned object when it is not
- * needed.
+ * Removes the last element from the array `top`, returning the object that was
+ * removed. This object is not released, caller must unref the returned object
+ * when it is no longer needed.
  * @param top array ucl object
  * @return removed element or NULL if `top` is NULL or not an array
  */
 UCL_EXTERN ucl_object_t* ucl_array_pop_last (ucl_object_t *top);
 
 /**
- * Return object identified by an index of the array `top`
+ * Removes the first element from the array `top`, returning the object that was
+ * removed. This object is not released, caller must unref the returned object
+ * when it is no longer needed.
+ * @param top array ucl object
+ * @return removed element or NULL if `top` is NULL or not an array
+ */
+UCL_EXTERN ucl_object_t* ucl_array_pop_first (ucl_object_t *top);
+
+/**
+ * Return object identified by index of the array `top`
  * @param top object to get a key from (must be of type UCL_ARRAY)
  * @param index array index to return
  * @return object at the specified index or NULL if index is not found
@@ -481,7 +494,9 @@ UCL_EXTERN const ucl_object_t* ucl_array_find_index (const ucl_object_t *top,
 		unsigned int index);
 
 /**
- * Replace an element in an array with a different element
+ * Replace an element in an array with a different element, returning the object
+ * that was replaced. This object is not released, caller must unref the
+ * returned object when it is no longer needed.
  * @param top destination object (must be of type UCL_ARRAY)
  * @param elt element to append (must NOT be NULL)
  * @param index array index in destination to overwrite with elt
@@ -492,18 +507,10 @@ ucl_array_replace_index (ucl_object_t *top, ucl_object_t *elt,
 	unsigned int index);
 
 /**
- * Removes the first element from the array `top`. Caller must unref the returned object when it is not
- * needed.
- * @param top array ucl object
- * @return removed element or NULL if `top` is NULL or not an array
- */
-UCL_EXTERN ucl_object_t* ucl_array_pop_first (ucl_object_t *top);
-
-/**
  * Append a element to another element forming an implicit array
  * @param head head to append (may be NULL)
  * @param elt new element
- * @return true if element has been inserted
+ * @return the new implicit array
  */
 UCL_EXTERN ucl_object_t * ucl_elt_append (ucl_object_t *head,
 		ucl_object_t *elt);
@@ -597,7 +604,7 @@ UCL_EXTERN const char* ucl_object_tolstring (const ucl_object_t *obj, size_t *tl
  * Return object identified by a key in the specified object
  * @param obj object to get a key from (must be of type UCL_OBJECT)
  * @param key key to search
- * @return object matched the specified key or NULL if key is not found
+ * @return object matching the specified key or NULL if key was not found
  */
 UCL_EXTERN const ucl_object_t* ucl_object_find_key (const ucl_object_t *obj,
 		const char *key);
@@ -607,7 +614,7 @@ UCL_EXTERN const ucl_object_t* ucl_object_find_key (const ucl_object_t *obj,
  * @param obj object to get a key from (must be of type UCL_OBJECT)
  * @param key key to search
  * @param klen length of a key
- * @return object matched the specified key or NULL if key is not found
+ * @return object matching the specified key or NULL if key was not found
  */
 UCL_EXTERN const ucl_object_t* ucl_object_find_keyl (const ucl_object_t *obj,
 		const char *key, size_t klen);
@@ -639,6 +646,7 @@ UCL_EXTERN const char* ucl_object_keyl (const ucl_object_t *obj, size_t *len);
 /**
  * Increase reference count for an object
  * @param obj object to ref
+ * @return the referenced object
  */
 UCL_EXTERN ucl_object_t* ucl_object_ref (const ucl_object_t *obj);
 
