@@ -1563,7 +1563,7 @@ ucl_object_merge (ucl_object_t *top, ucl_object_t *elt, bool copy)
 			cp = ucl_object_copy (cur);
 		}
 		else {
-			cp = ucl_object_ref (cur);
+			cp = cur;
 		}
 		found = __DECONST(ucl_object_t *, ucl_hash_search (top->value.ov, cp->key, cp->keylen));
 		if (found == NULL) {

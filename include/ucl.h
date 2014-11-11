@@ -354,7 +354,7 @@ UCL_EXTERN bool ucl_object_replace_key (ucl_object_t *top, ucl_object_t *elt,
  * Merge the keys from one object to another object. Overwrite on conflict
  * @param top destination object (must be of type UCL_OBJECT)
  * @param elt element to insert (must be of type UCL_OBJECT)
- * @param copy copy rather than reference the elements
+ * @param copy copy rather than link the elements
  * @return true if all keys have been merged
  */
 UCL_EXTERN bool ucl_object_merge (ucl_object_t *top, ucl_object_t *elt, bool copy);
