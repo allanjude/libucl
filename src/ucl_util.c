@@ -1854,7 +1854,7 @@ ucl_array_merge (ucl_object_t *top, ucl_object_t *elt, bool copy)
 			cp = ucl_object_copy (cur);
 		}
 		else {
-			cp = ucl_object_ref (cur);
+			cp = cur;
 		}
 		if (cp != NULL) {
 			ucl_array_append (top, cp);
