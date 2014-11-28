@@ -147,7 +147,8 @@ typedef enum ucl_emitter {
 typedef enum ucl_parser_flags {
 	UCL_PARSER_KEY_LOWERCASE = 0x1, /**< Convert all keys to lower case */
 	UCL_PARSER_ZEROCOPY = 0x2, /**< Parse input in zero-copy mode if possible */
-	UCL_PARSER_NO_TIME = 0x4 /**< Do not parse time and treat time values as strings */
+	UCL_PARSER_NO_TIME = 0x4, /**< Do not parse time and treat time values as strings */
+	UCL_PARSER_NO_IMPLICIT_ARRAYS = 0x8 /** Create explicit arrays instead of implicit ones */
 } ucl_parser_flags_t;
 
 /**
@@ -175,7 +176,8 @@ typedef enum ucl_object_flags {
 	UCL_OBJECT_ALLOCATED_VALUE = 0x2, /**< An object has a string value allocated internally */
 	UCL_OBJECT_NEED_KEY_ESCAPE = 0x4, /**< The key of an object need to be escaped on output */
 	UCL_OBJECT_EPHEMERAL = 0x8, /**< Temporary object that does not need to be freed really */
-	UCL_OBJECT_MULTILINE = 0x16 /**< String should be displayed as multiline string */
+	UCL_OBJECT_MULTILINE = 0x10, /**< String should be displayed as multiline string */
+	UCL_OBJECT_MULTIVALUE = 0x20 /**< Object is a key with multiple values */
 } ucl_object_flags_t;
 
 /**
@@ -682,6 +684,21 @@ UCL_EXTERN int ucl_object_compare (const ucl_object_t *o1,
  */
 UCL_EXTERN void ucl_object_array_sort (ucl_object_t *ar,
 		int (*cmp)(const ucl_object_t *o1, const ucl_object_t *o2));
+
+/**
+ * Get the priority for specific UCL object
+ * @param obj any ucl object
+ * @return priority of an object
+ */
+UCL_EXTERN unsigned int ucl_object_get_priority (const ucl_object_t *obj);
+
+/**
+ * Set explicit priority of an object.
+ * @param obj any ucl object
+ * @param priority new priroity value (only 4 least significant bits are considred)
+ */
+UCL_EXTERN void ucl_object_set_priority (ucl_object_t *obj,
+		unsigned int priority);
 
 /**
  * Opaque iterator object
