@@ -2485,7 +2485,7 @@ ucl_object_iterate_safe (ucl_object_iter_t it, bool expand_values)
 	}
 
 	if (rit->impl_it->type == UCL_OBJECT || rit->impl_it->type == UCL_ARRAY) {
-		ret = ucl_object_iterate (rit->impl_it, &rit->expl_it, true);
+		ret = ucl_object_iterate (rit->impl_it, &rit->expl_it, expand_values);
 
 		if (ret == NULL) {
 			/* Need to switch to another implicit object in chain */
